@@ -1,0 +1,264 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>HSRP · Hot Standby Router Protocol</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&family=Source+Code+Pro:wght@400;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<style>
+/* Estilos adicionales para las imágenes integradas */
+.section-img { width: 100%; max-height: 320px; object-fit: cover; border-radius: 10px; margin: 1.5rem 0; box-shadow: 0 4px 14px rgba(0,0,0,0.12); }
+.hero-img { max-width: 440px; width: 100%; border-radius: 12px; box-shadow: 0 8px 24px rgba(0,0,0,0.15); }
+.flex-content { display: flex; align-items: center; gap: 2rem; flex-wrap: wrap; }
+.flex-content > div { flex: 1; min-width: 280px; }
+</style>
+</head>
+<body>
+<div id="bar"></div>
+<nav><b>HSRP</b><div><a href="#que">Qué es</a><a href="#como">Cómo funciona</a><a href="#conceptos">Conceptos</a><a href="#sim">Simulador</a><a href="#prio">Prioridad</a><a href="#config">Configuración</a><a class="pill" href="formulario.html">Ir al formulario</a></div></nav>
+
+<header><div class="hero">
+<div>
+<h1>Hot Standby Router Protocol</h1>
+<p>Dos routers trabajando como uno solo para que tu red nunca pierda su puerta de enlace.</p>
+<a class="btn" href="#sim">Probar la falla de un router</a>
+<div class="stats"><div><b><span data-n="3">0</span> s</b><span>Hello</span></div><div><b><span data-n="10">0</span> s</b><span>Hold time</span></div><div><b><span data-n="100">0</span></b><span>Prioridad por defecto</span></div><div><b><span data-n="255">0</span></b><span>Prioridad máxima</span></div></div>
+</div>
+<div>
+<img src="https://images.unsplash.com/photo-1544197150-b99a580bb7a8?auto=format&fit=crop&w=600&q=80" alt="Infraestructura de Redes y Routers" class="hero-img">
+</div>
+</div></header>
+
+<section id="que" class="rev">
+<div class="hsrp-info">
+    <h2>¿Qué es HSRP?</h2>
+
+    <div class="flex-content">
+        <div>
+            <p class="sub">
+                <b>HSRP (Hot Standby Router Protocol)</b> es un protocolo de redundancia
+                de primer salto desarrollado por <b>Cisco</b>. Su principal objetivo es
+                proporcionar <b>alta disponibilidad</b> en la puerta de enlace
+                predeterminada de una red, evitando que los dispositivos pierdan la
+                comunicación cuando un router presenta una falla.
+            </p>
+
+            <p class="sub">
+                HSRP funciona mediante un grupo de dos o más routers que trabajan
+                juntos como si fueran una sola puerta de enlace lógica. Para lograrlo,
+                los routers comparten una <b>dirección IP virtual</b> y una
+                <b>dirección MAC virtual</b>. Los dispositivos de la red, como
+                computadoras, servidores e impresoras, utilizan esta IP virtual como
+                su <b>gateway predeterminado</b>.
+            </p>
+        </div>
+        <div>
+            <img src="https://images.unsplash.com/photo-1558494949-ef010cbdcc31?auto=format&fit=crop&w=600&q=80" alt="Centro de datos y redes empresariales" class="section-img" style="margin:0;">
+        </div>
+    </div>
+
+    <h3>¿Cómo funciona HSRP?</h3>
+
+    <p class="sub">
+        Dentro del grupo HSRP, un router toma el papel de <b>Active</b> y es
+        responsable de reenviar el tráfico de los dispositivos hacia otras
+        redes. Otro router adopta el estado de <b>Standby</b> y permanece
+        preparado para asumir la función principal si el router Active deja
+        de funcionar.
+    </p>
+
+    <p class="sub">
+        Los routers intercambian mensajes de control llamados <b>Hello</b>
+        para comprobar que los miembros del grupo continúan disponibles.
+        Cuando el router Standby detecta que el Active ya no responde,
+        puede asumir automáticamente el estado Active y comenzar a utilizar
+        la IP y MAC virtuales.
+    </p>
+
+    <h3>Elementos principales de HSRP</h3>
+
+    <ul>
+        <li>
+            <b>IP virtual:</b> Es la dirección que utilizan los dispositivos
+            de la LAN como puerta de enlace predeterminada.
+        </li>
+        <li>
+            <b>MAC virtual:</b> Es una dirección MAC asociada al grupo HSRP
+            que permite identificar la puerta de enlace virtual.
+        </li>
+        <li>
+            <b>Router Active:</b> Es el router que actualmente procesa el
+            tráfico de los dispositivos de la red.
+        </li>
+        <li>
+            <b>Router Standby:</b> Es el router de respaldo que permanece
+            preparado para tomar el control.
+        </li>
+        <li>
+            <b>Grupo HSRP:</b> Identifica a los routers que participan en la
+            misma configuración de redundancia.
+        </li>
+        <li>
+            <b>Prioridad:</b> Determina qué router tiene preferencia para
+            convertirse en Active. Un valor de prioridad mayor tiene mayor
+            preferencia.
+        </li>
+    </ul>
+
+    <h3>¿Qué sucede si falla el router Active?</h3>
+
+    <p class="sub">
+        Si el router Active deja de funcionar, el router Standby detecta la
+        falla mediante los mensajes de control de HSRP. Después de comprobar
+        que el Active ya no está disponible, el Standby cambia al estado
+        <b>Active</b> y comienza a responder utilizando la misma IP virtual.
+    </p>
+
+    <p class="sub">
+        Una de las principales ventajas es que los dispositivos de la LAN
+        <b>no necesitan cambiar su configuración</b>. Las computadoras
+        continúan utilizando la misma puerta de enlace predeterminada,
+        mientras que HSRP se encarga de realizar el cambio entre routers.
+    </p>
+
+    <h3>¿Para qué sirve HSRP?</h3>
+
+    <p class="sub">
+        HSRP se utiliza principalmente para aumentar la <b>disponibilidad
+        y confiabilidad</b> de una red. Es especialmente útil en redes
+        empresariales donde una interrupción de la puerta de enlace puede
+        afectar a muchos usuarios y servicios.
+    </p>
+
+    <h3>Ventajas de HSRP</h3>
+
+    <ul>
+        <li>Proporciona redundancia en la puerta de enlace predeterminada.</li>
+        <li>Reduce el tiempo de interrupción cuando un router falla.</li>
+        <li>Permite utilizar una IP virtual como gateway.</li>
+        <li>Los usuarios no necesitan modificar su configuración de red.</li>
+        <li>Permite establecer prioridades entre los routers.</li>
+        <li>Mejora la disponibilidad y confiabilidad de la red.</li>
+        <li>Es compatible con equipos y tecnologías de redes Cisco.</li>
+    </ul>
+</div>
+</section>
+
+<section id="como" class="rev">
+<h2>¿Cómo funciona?</h2>
+<p class="sub">Toca cada paso para ver el detalle.</p>
+<img src="https://images.unsplash.com/photo-1526374965328-7f61d4dc18c5?auto=format&fit=crop&w=1000&q=80" alt="Flujo de datos y conexiones de red" class="section-img">
+<div class="steps">
+<div class="step"><b>Se conectan los routers</b><p>Router A (192.168.1.2) y Router B (192.168.1.3) están en la misma red y pertenecen al grupo HSRP 10, con IP virtual 192.168.1.1.</p></div>
+<div class="step"><b>Se elige el router activo</b><p>Gana la prioridad más alta (por defecto 100). En empate gana la IP física más alta. Router A queda Active y Router B Standby.</p></div>
+<div class="step"><b>Los equipos usan la IP virtual</b><p>Los PCs usan 192.168.1.1 como gateway, nunca 192.168.1.2 ni 192.168.1.3.</p></div>
+<div class="step"><b>Los routers intercambian mensajes Hello</b><p>Se envían por multicast 224.0.0.2 (UDP 1985) cada 3 segundos para que el Standby sepa que el Active sigue vivo.</p></div>
+<div class="step"><b>Si Router A falla, Router B toma el control</b><p>Si el Standby no recibe Hello durante el hold time (10 s por defecto), pasa de Standby a Active y responde por 192.168.1.1.</p></div>
+</div></section>
+
+<section id="conceptos" class="rev">
+<h2>Conceptos clave</h2>
+<p class="sub">Mueve el mouse sobre las tarjetas y toca una para girarla.</p>
+<div class="grid">
+<div class="flip"><div><span class="f">Active<small>toca para girar</small></span><span class="b">Router que da el servicio de gateway y reenvía el tráfico hacia la IP virtual.</span></div></div>
+<div class="flip"><div><span class="f">Standby<small>toca para girar</small></span><span class="b">Router preparado para sustituir al activo; escucha sus mensajes Hello.</span></div></div>
+<div class="flip"><div><span class="f">IP virtual<small>toca para girar</small></span><span class="b">Dirección que usan los dispositivos como gateway. Aquí: 192.168.1.1.</span></div></div>
+<div class="flip"><div><span class="f">Grupo HSRP<small>toca para girar</small></span><span class="b">Identificador del grupo de redundancia. Todos los routers usan el mismo número (10).</span></div></div>
+<div class="flip"><div><span class="f">Priority<small>toca para girar</small></span><span class="b">Valor de 0 a 255 (por defecto 100). El más alto se convierte en Active.</span></div></div>
+<div class="flip"><div><span class="f">Preempt<small>toca para girar</small></span><span class="b">Permite que un router de mayor prioridad recupere el rol Active al volver a la red.</span></div></div>
+<div class="flip"><div><span class="f">Hello y Hold<small>toca para girar</small></span><span class="b">Hello cada 3 s; si no llegan en 10 s, el Standby asume el rol Active.</span></div></div>
+<div class="flip"><div><span class="f">Track<small>toca para girar</small></span><span class="b">Monitorea otra interfaz (por ejemplo hacia el ISP) y baja la prioridad si cae.</span></div></div>
+</div></section>
+
+<section id="sim" class="rev">
+<h2>Simulador de failover</h2>
+<p class="sub">Apaga el Router A y observa cómo el PC sigue usando el mismo gateway.</p>
+<div class="card">
+<div class="pc">PC1 · 192.168.1.10<br>Gateway: 192.168.1.1</div>
+<div class="wire" id="wire"></div>
+<div class="routers">
+<div class="r act" id="rA"><b>Router A</b><br>192.168.1.2 · Prioridad 110<br><span class="tag">Active</span></div>
+<div class="r sb" id="rB"><b>Router B</b><br>192.168.1.3 · Prioridad 100<br><span class="tag">Standby</span></div>
+</div>
+<p id="msg">Estado normal: Router A atiende el tráfico de 192.168.1.1.</p>
+<div class="hold"><div id="hold"></div></div>
+<button class="btn" id="fail" style="margin:0">Simular falla del Router A</button>
+<button class="btn ghost" id="restore" style="margin:0 0 0 .5rem" disabled>Restaurar Router A</button>
+</div></section>
+
+<section id="prio" class="rev">
+<h2>¿Quién será el Active?</h2>
+<p class="sub">Mueve las prioridades y activa o desactiva preempt para ver quién gana la elección.</p>
+<div class="card two">
+<div>
+<b>Router A · <span id="va">110</span></b><input type="range" id="pa" min="100" max="255" value="110">
+<b>Router B · <span id="vb">100</span></b><input type="range" id="pb" min="100" max="255" value="100">
+<label style="cursor:pointer"><input type="checkbox" id="pre" checked> standby 10 preempt</label>
+</div>
+<div><div class="big" id="res"></div><p id="note" style="font-size:.9rem"></p></div>
+</div></section>
+
+<section id="config" class="rev">
+<h2>Configuración en Cisco IOS</h2>
+<p class="sub">Grupo 10, IP virtual 192.168.1.1. Router A con prioridad 110 y Router B con 100.</p>
+<div class="tabs"><button class="on" data-t="a">Router A · Active</button><button data-t="b">Router B · Standby</button></div>
+<pre><button class="copy">Copiar</button><code id="code"></code></pre>
+<p class="sub" style="margin-top:1rem">Verifica con <code>show standby</code> o <code>show standby brief</code>. Para probar la redundancia, haz ping a 192.168.1.1 desde el PC y apaga la interfaz del Router A con <code>shutdown</code>.</p>
+</section>
+
+<section class="rev"><div class="cta"><h2>¿Ya dominas HSRP?</h2><p>Responde 8 preguntas y recibe tu resultado en tu correo.</p><a class="btn" href="formulario.html">Ir al formulario</a></div></section>
+
+<footer>UPEGRO · Ingeniería en Tecnologías de la Información e Innovación Digital · Proyecto HSRP</footer>
+<script src="app.js"></script>
+<script>
+$$('.step').forEach(s=>s.onclick=()=>s.classList.toggle('open'));
+
+// Simulador con cuenta regresiva del hold time
+const A=$('#rA'),B=$('#rB'),msg=$('#msg'),hold=$('#hold');
+const set=(el,c,t)=>{el.className='r '+c;el.querySelector('.tag').textContent=t};
+$('#fail').onclick=()=>{
+  set(A,'down','Caído');$('#wire').classList.add('off');$('#fail').disabled=true;
+  let t=10;const iv=setInterval(()=>{t-=.5;hold.style.width=t*10+'%';msg.textContent=`Sin Hello del Router A… hold time: ${Math.ceil(t)} s`;
+    if(t<=0){clearInterval(iv);set(B,'act','Active');$('#wire').classList.remove('off');msg.textContent='Router B pasó de Standby a Active. El PC sigue usando 192.168.1.1 sin cambios.';$('#restore').disabled=false}},150)};
+$('#restore').onclick=()=>{set(A,'act','Active');set(B,'sb','Standby');hold.style.width='100%';
+  msg.textContent='Con preempt, Router A (prioridad 110) recuperó el rol Active.';$('#restore').disabled=true;$('#fail').disabled=false};
+
+// Elección por prioridad
+let now=null;
+function elect(){
+  const a=+$('#pa').value,b=+$('#pb').value;$('#va').textContent=a;$('#vb').textContent=b;
+  const win=a>b?'A':b>a?'B':'B'; // empate: gana la IP más alta (192.168.1.3 = B)
+  const pre=$('#pre').checked;
+  if(!now||pre)now=win;
+  $('#res').textContent=`Active: Router ${now} · Standby: Router ${now=='A'?'B':'A'}`;
+  $('#note').textContent=a==b?'Empate: gana la IP física más alta (Router B, 192.168.1.3).':(now!==win?`Router ${win} tiene mayor prioridad, pero sin preempt no le quita el rol al Active actual.`:'Gana la prioridad más alta.');
+}
+['pa','pb','pre'].forEach(i=>$('#'+i).oninput=elect);elect();
+
+// Configuración
+const CODE={a:`enable
+configure terminal
+hostname RouterA
+interface GigabitEthernet0/0
+ ip address 192.168.1.2 255.255.255.0
+ no shutdown
+ standby 10 ip 192.168.1.1
+ standby 10 priority 110
+ standby 10 preempt
+end
+write memory`,b:`enable
+configure terminal
+hostname RouterB
+interface GigabitEthernet0/0
+ ip address 192.168.1.3 255.255.255.0
+ no shutdown
+ standby 10 ip 192.168.1.1
+ standby 10 priority 100
+end
+write memory`};
+let cur='a';$('#code').textContent=CODE.a; $$('.tabs button').forEach(b=>b.onclick=()=>{$$('.tabs button').forEach(x=>x.classList.remove('on'));b.classList.add('on');cur=b.dataset.t;$('#code').textContent=CODE[cur]});
+$('.copy').onclick=e=>{navigator.clipboard.writeText(CODE[cur]);e.target.textContent='¡Copiado!';setTimeout(()=>e.target.textContent='Copiar',1500)};
+</script>
+</body>
+</html>

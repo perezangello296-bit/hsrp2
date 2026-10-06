@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Formulario HSRP</title>
+<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;800&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="style.css">
+<script src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
+</head>
+<body>
+<div id="bar"></div>
+<nav><b>HSRP</b><div><a href="index.html">Volver a la página</a><a class="pill" href="formulario.html">Formulario</a></div></nav>
+<div class="wiz"><div class="dots" id="dots"></div><div class="card" id="box"></div></div>
+<footer>UPEGRO · Proyecto HSRP</footer>
+<script src="app.js"></script>
+<script>
+/* ====== CONFIGURA AQUÍ TUS DATOS DE EMAILJS ====== */
+const CFG={PUBLIC_KEY:"dwdkq9TG2JpMu9Q12",SERVICE_ID:"service_z81jm2v",TEMPLATE_ID:"template_5z8vaag"};
+/* ================================================= */
+emailjs.init({publicKey:CFG.PUBLIC_KEY});
+const Q=[
+["¿Qué significa HSRP?",["Hot Standby Router Protocol","High Speed Routing Protocol","Host Secure Router Path"],0,"Es un protocolo propietario de Cisco de redundancia de primer salto."],
+["¿Qué gateway usan los PCs de la LAN?",["La IP del Router A","La IP virtual","La IP del Router B"],1,"Los PCs usan la IP virtual (192.168.1.1)."],
+["¿Cuál es la prioridad por defecto en HSRP?",["50","100","255"],1,"El valor por defecto es 100; gana el más alto."],
+["¿Qué router reenvía el tráfico hacia la IP virtual?",["Standby","Listen","Active"],2,"El router Active procesa y reenvía el tráfico."],
+["¿Qué comando permite que un router de mayor prioridad recupere el rol Active?",["standby 10 preempt","standby 10 timers","standby 10 track"],0,"Preempt permite recuperar el rol Active."],
+["¿Cada cuánto se envían los mensajes Hello por defecto?",["1 segundo","3 segundos","10 segundos"],1,"Hello cada 3 s y hold time de 10 s."],
+["En el ejemplo, ¿qué número de grupo HSRP se usa?",["1","10","20"],1,"Se usa el grupo 10."],
+["¿Qué comando muestra el estado de HSRP de forma resumida?",["show standby brief","show ip route","show vlan"],0,"show standby brief muestra un resumen del estado."]];
+const box=$('#box'),dots=$('#dots');
+let name='',mail='',score=0,detail='',i=-1;
+dots.innerHTML='<i class="d"></i>'+Q.map(()=>'<i></i>').join('');
+
+function start(){
+  box.innerHTML=`<div class="slide"><h2>Regístrate</h2><p class="sub">Tu resultado llegará al correo que escribas.</p>
+  <input type="text" id="nm" placeholder="Tu nombre"><input type="email" id="em" placeholder="Tu correo electrónico">
+  <p id="err" style="color:var(--warn);font-size:.9rem;min-height:1.3em"></p><button class="btn" id="go" style="margin:0">Empezar</button></div>`;
+  $('#go').onclick=()=>{name=$('#nm').value.trim();mail=$('#em').value.trim();
+    if(!name||!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(mail)){$('#err').textContent='Escribe tu nombre y un correo válido.';return}
+    i=0;ask()}}
+
+function ask(){
+  const q=Q[i];
+  box.innerHTML=`<div class="slide"><small>Pregunta ${i+1} de ${Q.length}</small><h2 style="font-size:1.4rem">${q[0]}</h2>
+  ${q[1].map((o,j)=>`<button class="opt" data-j="${j}">${o}</button>`).join('')}
+  <p class="fb"></p><button class="btn" id="nx" style="margin:0" hidden>${i==Q.length-1?'Ver resultado':'Siguiente'}</button></div>`;
+  $$('.opt').forEach(b=>b.onclick=()=>{
+    const ok=+b.dataset.j===q[2];score+=ok;
+    $$('.opt').forEach(x=>{x.disabled=true;if(+x.dataset.j===q[2])x.classList.add('good')});
+    if(!ok)b.classList.add('bad');
+    dots.children[i+1].className=ok?'c':'x';
+    detail+=`${i+1}. ${ok?'Correcta':'Incorrecta'} - ${q[3]}\n`;
+    $('.fb').textContent=(ok?'¡Correcto! ':'Casi. ')+q[3];$('#nx').hidden=false;
+    $('#nx').onclick=()=>{i++;i<Q.length?ask():finish()}})}
+
+async function send(){
+  const st=$('#status');st.style.color='var(--pet)';st.textContent='Enviando tu resultado por correo…';
+  try{await emailjs.send(CFG.SERVICE_ID,CFG.TEMPLATE_ID,{to_name:name,to_email:mail,score,total:Q.length,detail});
+    st.style.color='var(--ok)';st.textContent='Listo, te enviamos el resultado a '+mail}
+  catch(e){console.error(e);st.style.color='var(--warn)';
+    st.innerHTML='No se pudo enviar el correo. Revisa la configuración de EmailJS. <button class="btn ghost" id="rt" style="margin:.5rem 0 0">Reintentar</button>';$('#rt').onclick=send}}
+
+function finish(){
+  const pct=score/Q.length,msg=pct==1?'¡Perfecto! Dominas HSRP.':pct>=.6?'¡Muy bien! Repasa lo que fallaste.':'Repasa la página y vuelve a intentarlo.';
+  box.innerHTML=`<div class="res slide"><h2>Resultado de ${name}</h2>
+  <svg class="ring" viewBox="0 0 170 170"><circle cx="85" cy="85" r="70" stroke="#dcebee"/><circle class="fg" cx="85" cy="85" r="70"/><text x="85" y="97" text-anchor="middle" font-size="34" font-weight="800" fill="#0e5a6b">${score}/${Q.length}</text></svg>
+  <p style="margin:1rem 0">${msg}</p><p id="status"></p>
+  <a class="btn" href="index.html">Volver a la página</a> <button class="btn ghost" onclick="location.reload()">Intentar de nuevo</button></div>`;
+  setTimeout(()=>$('.fg').style.strokeDashoffset=440*(1-pct),100);
+  send()}
+start();
+</script>
+</body>
+</html>
